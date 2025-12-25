@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Cryptography;
+using System.Text;
 using ChatServer.Data;
 using ChatServer.Models;
-using System.Security.Cryptography;
-using System.Text;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 // 회원가입 API
 namespace ChatServer.Controllers
@@ -20,14 +21,16 @@ namespace ChatServer.Controllers
         }
 
         [HttpPost("signup")]
-        public IActionResult Signup(string email, string password, string nickname)
+        public async Task<IActionResult> Signup(string email, string password, string nickname)
         {
             Console.Write("회원가입 요청이 들어왔습니다.");
 
-            if(_db.Users.Any(u => u.Email == email))
+            bool exists = await _db.Users.AnyAsync(u => u.Email == email);
+
+            if (exists)
             {
-                Console.Write("이미 사용중인 이메일입니다.");
-                return BadRequest("이미 사용중인 이메일입니다.");
+                Console.WriteLine("이미 사용 중인 이메일입니다.");
+                return BadRequest("이미 사용 중인 이메일입니다.");
             }
 
             var user = new User
@@ -39,7 +42,8 @@ namespace ChatServer.Controllers
             };
 
             _db.Users.Add(user);
-            _db.SaveChanges();
+
+            await _db.SaveChangesAsync();
 
             Console.Write("회원가입이 완료되었습니다.");
 
