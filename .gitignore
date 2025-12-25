@@ -506,3 +506,4 @@ Thumbs.db
 **/appsettings.Development.json
  
 appsettings.json
+ChatServer/appsettings.json
