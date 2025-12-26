@@ -1,12 +1,13 @@
-﻿using System.Security.Cryptography;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using ChatServer.Data;
 using ChatServer.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 // 회원가입 API
 namespace ChatServer.Controllers
@@ -14,14 +15,14 @@ namespace ChatServer.Controllers
     [ApiController]
     [Route("auth")]
 
-    public class AuthControllercs : ControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly AppDbContext _db;
 
         // Program.cs 에서 사용한 키와 반드시 동일해야함!        
         private const string JwtKey = "이건_과제용_비밀키_아무문자나_길게";
 
-        public AuthControllercs(AppDbContext db)
+        public AuthController(AppDbContext db)
         {
             _db = db;
         }
@@ -47,7 +48,7 @@ namespace ChatServer.Controllers
                 Email = email,
                 PasswordHash = HassPassword(password),
                 Nickname = nickname,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             _db.Users.Add(user);
@@ -59,7 +60,7 @@ namespace ChatServer.Controllers
             return Ok(new
             {
                 userId = user.Id,
-                emali = user.Email,
+                email = user.Email,
                 nickname = user.Nickname,
                 createdAt = user.CreatedAt
             });
@@ -130,7 +131,7 @@ namespace ChatServer.Controllers
             var token = new JwtSecurityToken
             (
                 claims: claims,
-                expires: DateTime.Now.AddHours(1), // 1시간 유효
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: creds
             );
 
