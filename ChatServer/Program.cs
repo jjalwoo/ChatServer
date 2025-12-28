@@ -46,6 +46,28 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
+
+    options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // 들어온 Authorization 헤더를 콘솔에 찍음 (디버그용)
+            var auth = context.Request.Headers["Authorization"].FirstOrDefault();
+            Console.WriteLine($"[JWT] OnMessageReceived Authorization header: {auth}");
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("[JWT] OnTokenValidated: 토큰 검증 성공");
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            // 검증 실패 이유를 콘솔에 찍음 ? 반드시 출력값을 복사해서 보내줘
+            Console.WriteLine("[JWT] OnAuthenticationFailed: " + context.Exception?.ToString());
+            return Task.CompletedTask;
+        }
+    };
 });
 
 
