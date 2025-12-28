@@ -4,11 +4,18 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ChatServer.Hubs; 
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ==========================
+// SignalR 서비스 등록
+// ==========================
+builder.Services.AddSignalR();
 
-// DB 설정 (기존 코드 그대로)
+// ==========================
+// DB 설정
+// ==========================
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseMySql(
@@ -17,12 +24,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     );
 });
 
-
+// ==========================
 // JWT 비밀키
+// ==========================
 var jwtKey = "이건_과제용_비밀키_아무문자나_길게";
 
-
+// ==========================
 // JWT 인증 설정
+// ==========================
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -32,28 +41,34 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        // 서명 검증
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(jwtKey)
         ),
-
-        // 과제에서는 발급자/대상 검증 생략
         ValidateIssuer = false,
         ValidateAudience = false,
-
-        // 만료 시간 검증
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
 
-    options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+    // =====================================================
+    // SignalR에서 JWT를 QueryString으로 받기 위한 코드
+    // =====================================================
+    options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
-            // 들어온 Authorization 헤더를 콘솔에 찍음 (디버그용)
-            var auth = context.Request.Headers["Authorization"].FirstOrDefault();
-            Console.WriteLine($"[JWT] OnMessageReceived Authorization header: {auth}");
+            // SignalR은 Authorization 헤더 대신
+            // access_token 쿼리스트링을 사용함
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/chat"))
+            {
+                context.Token = accessToken;
+            }
+
             return Task.CompletedTask;
         },
         OnTokenValidated = context =>
@@ -63,64 +78,70 @@ builder.Services.AddAuthentication(options =>
         },
         OnAuthenticationFailed = context =>
         {
-            // 검증 실패 이유를 콘솔에 찍음 ? 반드시 출력값을 복사해서 보내줘
-            Console.WriteLine("[JWT] OnAuthenticationFailed: " + context.Exception?.ToString());
+            Console.WriteLine("[JWT] OnAuthenticationFailed: " + context.Exception);
             return Task.CompletedTask;
         }
     };
 });
 
-
-// 컨트롤러 / Swagger
+// ==========================
+// Controller / Swagger
+// ==========================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "ChatServer API",
         Version = "v1"
     });
 
-    // JWT 인증 정의
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
         BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Bearer {토큰} 형식으로 입력하세요"
+        In = ParameterLocation.Header,
+        Description = "Bearer 제외하고 토큰만 입력"
     });
 
-    // JWT 인증 요구
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
+
 var app = builder.Build();
 
-// 미들웨어
+// ==========================
+// Middleware
+// ==========================
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ==========================
+// Endpoint Mapping
+// ==========================
 app.MapControllers();
+
+// SignalR Hub 엔드포인트
+app.MapHub<ChatHub>("/chat");
 
 app.Run();
