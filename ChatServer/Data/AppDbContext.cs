@@ -13,5 +13,8 @@ namespace ChatServer.Data
         // table을 생성
         // User 클래스를 기반으로 Users라는 테이블을 만든다.
         public DbSet<User> Users { get; set; }
+
+        // Room 클래스를 기반으로 Romm라는 테이블을 만든다.
+        public DbSet<Room> Rooms { get; set; }
     }
 }

@@ -45,6 +45,8 @@ namespace ChatServer.Controllers
                 return NotFound();
             }
 
+            Console.WriteLine("사용자 정보를 찾았습니다.");
+
             return Ok(new
             {
                 id = user.Id,
