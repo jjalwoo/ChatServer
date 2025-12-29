@@ -57,6 +57,7 @@ Microsoft.AspNetCore.SignalR
 
 ## 🗂 프로젝트 구조
 
+```text
 ChatServer
  ├─ Controllers
  │   ├─ AuthController.cs      // 회원가입, 로그인
