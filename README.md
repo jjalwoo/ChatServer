@@ -39,6 +39,8 @@ REST API와 SignalR(WebSocket 기반)을 함께 사용하여 **인증된 사용�
 ## 📦 NuGet 패키지
 
 ### 서버 프로젝트
+
+```text
 Microsoft.EntityFrameworkCore
 Microsoft.EntityFrameworkCore.Tools
 Pomelo.EntityFrameworkCore.MySql
@@ -48,7 +50,6 @@ System.IdentityModel.Tokens.Jwt
 
 Microsoft.AspNetCore.SignalR
 
-## 📦 NuGet 패키지
 
 ### 콘솔 클라이언트
 - Microsoft.AspNetCore.SignalR.Client
@@ -76,3 +77,36 @@ ChatServer
  │
  ├─ Program.cs
  └─ appsettings.json
+
+## 🔐 인증 구조 (JWT)
+
+- 로그인 성공 시 서버에서 JWT 토큰을 발급합니다.
+- 인증이 필요한 API는 JWT 토큰을 통해 사용자 정보를 식별합니다.
+- SignalR(WebSocket) 연결 시에도 JWT 인증이 필수입니다.
+- SignalR 특성상 JWT 토큰은 `access_token` 쿼리 스트링으로 전달됩니다.
+
+---
+
+## 📖 API 기능 설명
+
+### 1️⃣ 회원가입
+
+**POST /auth/signup**
+
+#### 요청
+
+| 필드 | 설명 |
+|---|---|
+| email | 사용자 이메일 (중복 불가) |
+| password | 비밀번호 (서버에서 해시 처리) |
+| nickname | 닉네임 |
+
+#### 응답
+
+```json
+{
+  "userId": 1,
+  "email": "test@test.com",
+  "nickname": "tester",
+  "createdAt": "2024-01-01T12:00:00"
+}
