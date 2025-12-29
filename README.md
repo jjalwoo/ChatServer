@@ -39,7 +39,6 @@ REST API와 SignalR(WebSocket 기반)을 함께 사용하여 **인증된 사용�
 ## 📦 NuGet 패키지
 
 ### 서버 프로젝트
-```text
 Microsoft.EntityFrameworkCore
 Microsoft.EntityFrameworkCore.Tools
 Pomelo.EntityFrameworkCore.MySql
@@ -58,7 +57,6 @@ Microsoft.AspNetCore.SignalR
 
 ## 🗂 프로젝트 구조
 
-```text
 ChatServer
  ├─ Controllers
  │   ├─ AuthController.cs      // 회원가입, 로그인
