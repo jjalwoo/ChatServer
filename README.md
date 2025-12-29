@@ -54,5 +54,41 @@ Microsoft.AspNetCore.SignalR.Client
 
 ---
 
-# 🗂 프로젝트 구조
-ChatServer ├─ Controllers │  ├─ AuthController.cs      // 회원가입, 로그인 │  ├─ UsersController.cs     // 내 정보 조회 │  └─ RoomsController.cs     // 채팅방 생성 및 조회 ├─ Hubs │  └─ ChatHub.cs             // SignalR 채팅 허브 ├─ Models │  ├─ User.cs │  └─ Room.cs ├─ Data │  └─ AppDbContext.cs ├─ Program.cs └─ appsettings.json
+## 📁 프로젝트 구조
+
+
+ChatServer ├── Controllers │   ├── AuthController.cs      // 회원가입, 로그인 │   ├── UsersController.cs     // 내 정보 조회 │   └── RoomsController.cs     // 채팅방 생성 및 조회 │ ├── Hubs │   └── ChatHub.cs             // SignalR 채팅 허브 │ ├── Models │   ├── User.cs │   └── Room.cs │ ├── Data │   └── AppDbContext.cs │ ├── Program.cs └── appsettings.json
+
+
+
+---
+
+## 🔐 인증 구조 (JWT)
+
+- 로그인 성공 시 서버에서 **JWT 토큰 발급**
+- 인증이 필요한 API는 JWT 토큰을 통해 사용자 정보 식별
+- SignalR(WebSocket) 연결 시에도 JWT 인증 필수
+- SignalR 특성상 JWT 토큰은 `access_token` 쿼리 스트링으로 전달
+
+---
+
+## 📖 API 기능 설명
+
+### 1. 회원가입
+**POST** `/auth/signup`
+
+### 요청
+| 필드     | 설명                          |
+|----------|-------------------------------|
+| email    | 사용자 이메일 (중복 불가)     |
+| password | 비밀번호 (서버에서 해시 처리) |
+| nickname | 닉네임                        |
+
+### 응답 예시
+```json
+{
+  "userId": 1,
+  "email": "test@test.com",
+  "nickname": "tester",
+  "createdAt": "2024-01-01T12:00:00"
+}
