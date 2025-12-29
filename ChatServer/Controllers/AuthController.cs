@@ -19,7 +19,7 @@ namespace ChatServer.Controllers
     {
         private readonly AppDbContext _db;
 
-        // Program.cs 에서 사용한 키와 반드시 동일해야함!        
+        // Program.cs 에서 사용한 키와 반드시 동일해야한다.   
         private const string JwtKey = "이건_과제용_비밀키_아무문자나_길게";
 
         public AuthController(AppDbContext db)
