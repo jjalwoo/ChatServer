@@ -56,9 +56,20 @@ Microsoft.AspNetCore.SignalR.Client
 
 ## 📁 프로젝트 구조
 
-
-ChatServer ├── Controllers │   ├── AuthController.cs      // 회원가입, 로그인 │   ├── UsersController.cs     // 내 정보 조회 │   └── RoomsController.cs     // 채팅방 생성 및 조회 │ ├── Hubs │   └── ChatHub.cs             // SignalR 채팅 허브 │ ├── Models │   ├── User.cs │   └── Room.cs │ ├── Data │   └── AppDbContext.cs │ ├── Program.cs └── appsettings.json
-
+- ChatServer
+  - Controllers
+    - AuthController.cs (회원가입, 로그인)
+    - UsersController.cs (내 정보 조회)
+    - RoomsController.cs (채팅방 생성 및 조회)
+  - Hubs
+    - ChatHub.cs (SignalR 채팅 허브)
+  - Models
+    - User.cs
+    - Room.cs
+  - Data
+    - AppDbContext.cs
+  - Program.cs
+  - appsettings.json
 
 
 ---
